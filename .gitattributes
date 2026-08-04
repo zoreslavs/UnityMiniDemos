@@ -16,11 +16,11 @@
 
 # Unity source files
 *.cginc                 text
-*.compute               text linguist-language=hlsl
+*.compute               text linguist-vendored
 *.cs                    text diff=csharp
-*.hlsl                  text linguist-language=hlsl
-*.raytrace              text linguist-language=hlsl
-*.shader                text
+*.hlsl                  text linguist-vendored
+*.raytrace              text linguist-vendored
+*.shader                text linguist-vendored
 
 # Unity JSON files
 *.asmdef                unity-json
