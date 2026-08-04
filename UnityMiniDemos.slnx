@@ -22,6 +22,7 @@
   <Project Path="Unity.VisualScripting.Flow.csproj" />
   <Project Path="Unity.PerformanceTesting.csproj" />
   <Project Path="Unity.2D.Tilemap.Extras.Editor.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="PsdPlugin.csproj" />
   <Project Path="Unity.2D.IK.Editor.csproj" />
   <Project Path="Unity.InternalAPIEngineBridge.001.csproj" />
@@ -43,7 +44,6 @@
   <Project Path="Unity.InputSystem.TestFramework.csproj" />
   <Project Path="Unity.VisualScripting.Shared.Editor.csproj" />
   <Project Path="Unity.2D.Aseprite.Common.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.InputSystem.DocCodeSamples.csproj" />
   <Project Path="Unity.VisualScripting.DocCodeExamples.csproj" />
   <Project Path="Unity.Collections.Editor.csproj" />
