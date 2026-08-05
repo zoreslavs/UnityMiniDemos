@@ -9,7 +9,7 @@ namespace UnityMiniDemos.Features.AceOfShadows
     {
         [SerializeField] private Slider _speedSlider;
         [SerializeField] private TMP_Text _speedText;
-        [SerializeField] private AnimationController _animationController;
+        [SerializeField] private CardDealer _cardDealer;
         [SerializeField, Min(0.01f)] private float _minSpeed = 0.1f;
         [SerializeField, Min(0.01f)] private float _maxSpeed = 10f;
         [SerializeField, Min(0.01f)] private float _defaultSpeed = 1f;
@@ -19,9 +19,9 @@ namespace UnityMiniDemos.Features.AceOfShadows
 
         private void Awake()
         {
-            if (_speedSlider == null || _animationController == null)
+            if (_speedSlider == null || _cardDealer == null)
             {
-                Debug.LogError("SpeedController requires a slider and an animation controller.", this);
+                Debug.LogError("SpeedController requires a slider and a card dealer.", this);
                 return;
             }
 
@@ -53,11 +53,11 @@ namespace UnityMiniDemos.Features.AceOfShadows
 
         private void ApplySpeed(float speedMultiplier)
         {
-            if (_animationController == null)
+            if (_cardDealer == null)
                 return;
 
             var actualSpeed = SliderValueToSpeed(speedMultiplier);
-            _animationController.SetSpeedMultiplier(actualSpeed);
+            _cardDealer.SetSpeedMultiplier(actualSpeed);
 
             if (_speedText == null)
                 return;

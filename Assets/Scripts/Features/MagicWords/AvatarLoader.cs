@@ -8,43 +8,89 @@ namespace UnityMiniDemos.Features.MagicWords
 {
     public sealed class AvatarLoader
     {
-        public IEnumerator Load(AvatarData[] avatars, Action<Dictionary<string, Texture2D>> onCompleted)
-        {
-            var textures = new Dictionary<string, Texture2D>(StringComparer.OrdinalIgnoreCase);
-            var processedNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        private const int RequestTimeoutSeconds = 10;
 
-            if (avatars == null)
+        private readonly Dictionary<string, Texture2D> _textures = new(StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> _pendingNames = new(StringComparer.OrdinalIgnoreCase);
+
+        public bool TryGetTexture(string characterName, out Texture2D texture)
+        {
+            if (string.IsNullOrWhiteSpace(characterName))
             {
-                onCompleted?.Invoke(textures);
-                yield break;
+                texture = null;
+                return false;
             }
+
+            return _textures.TryGetValue(characterName, out texture);
+        }
+
+        public IEnumerator LoadAll(AvatarData[] avatars)
+        {
+            if (avatars == null)
+                yield break;
+
+            var pending = new List<(string Name, UnityWebRequest Request)>();
 
             foreach (var avatar in avatars)
             {
-                if (!IsValidAvatar(avatar) || !processedNames.Add(avatar.name))
+                if (!IsValidAvatar(avatar) || !_pendingNames.Add(avatar.name))
                     continue;
 
-                yield return LoadTexture(avatar, textures);
+                var request = UnityWebRequestTexture.GetTexture(avatar.url);
+                request.timeout = RequestTimeoutSeconds;
+                request.SendWebRequest();
+                pending.Add((avatar.name, request));
             }
 
-            onCompleted?.Invoke(textures);
+            foreach (var (name, request) in pending)
+            {
+                while (!request.isDone)
+                {
+                    yield return null;
+                }
+
+                TakeTexture(name, request);
+                request.Dispose();
+                _pendingNames.Remove(name);
+            }
         }
 
-        private static IEnumerator LoadTexture(AvatarData avatar, Dictionary<string, Texture2D> textures)
+        public IEnumerator WaitForAvatar(string characterName)
         {
-            using var request = UnityWebRequestTexture.GetTexture(avatar.url);
-            yield return request.SendWebRequest();
+            if (string.IsNullOrWhiteSpace(characterName))
+                yield break;
 
+            while (_pendingNames.Contains(characterName))
+            {
+                yield return null;
+            }
+        }
+
+        public void Clear()
+        {
+            _pendingNames.Clear();
+
+            foreach (var texture in _textures.Values)
+            {
+                if (texture != null)
+                    UnityEngine.Object.Destroy(texture);
+            }
+
+            _textures.Clear();
+        }
+
+        private void TakeTexture(string characterName, UnityWebRequest request)
+        {
             if (request.result != UnityWebRequest.Result.Success)
             {
-                Debug.LogWarning($"Avatar request failed for {avatar.name}: {request.error}");
-                yield break;
+                Debug.LogWarning($"Avatar request failed for {characterName}: {request.error}");
+                return;
             }
 
             var texture = DownloadHandlerTexture.GetContent(request);
 
             if (texture != null)
-                textures[avatar.name] = texture;
+                _textures[characterName] = texture;
         }
 
         private static bool IsValidAvatar(AvatarData avatar)
@@ -52,8 +98,7 @@ namespace UnityMiniDemos.Features.MagicWords
             if (avatar == null || string.IsNullOrWhiteSpace(avatar.name) || string.IsNullOrWhiteSpace(avatar.url))
                 return false;
 
-            return string.Equals(avatar.position, "left", StringComparison.OrdinalIgnoreCase) || 
-                   string.Equals(avatar.position, "right", StringComparison.OrdinalIgnoreCase);
+            return AvatarPosition.IsKnown(avatar.position);
         }
     }
 }

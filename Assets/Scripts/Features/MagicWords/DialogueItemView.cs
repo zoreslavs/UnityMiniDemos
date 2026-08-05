@@ -6,8 +6,12 @@ namespace UnityMiniDemos.Features.MagicWords
 {
     public sealed class DialogueItemView : MonoBehaviour
     {
+        [SerializeField] private RectTransform _container;
+        [SerializeField] private RectTransform _message;
+        [SerializeField] private RectTransform _content;
         [SerializeField] private RectTransform _bubble;
         [SerializeField] private RectTransform _user;
+        [SerializeField] private HorizontalLayoutGroup _layoutGroup;
         [SerializeField] private Image _bubbleImage;
         [SerializeField] private Image _tailImage;
         [SerializeField] private RawImage _avatarImage;
@@ -22,14 +26,8 @@ namespace UnityMiniDemos.Features.MagicWords
         [SerializeField] private float _minBubbleHeight = 120f;
         [SerializeField] private float _bubbleHorizontalPadding = 48f;
         [SerializeField] private float _bubbleVerticalPadding = 40f;
-        [SerializeField] private float _tailHorizontalInset = 74f;
-        [SerializeField] private float _tailVerticalOffset = 31f;
         [SerializeField] private float _minItemHeight = 300f;
         [SerializeField] private float _itemVerticalPadding = 40f;
-
-        private RectTransform _container;
-        private RectTransform _message;
-        private HorizontalLayoutGroup _layoutGroup;
 
         public void Configure(string name, string message, Texture2D avatar, bool alignLeft)
         {
@@ -82,19 +80,13 @@ namespace UnityMiniDemos.Features.MagicWords
 
             _message.sizeDelta = new Vector2(bubbleWidth, bubbleHeight);
 
-            var contentRect = _messageText.rectTransform.parent as RectTransform;
-            contentRect.sizeDelta = new Vector2(-_bubbleHorizontalPadding, -_bubbleVerticalPadding);
+            _content.sizeDelta = new Vector2(-_bubbleHorizontalPadding, -_bubbleVerticalPadding);
 
             var textRect = _messageText.rectTransform;
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
             textRect.anchoredPosition = Vector2.zero;
             textRect.sizeDelta = Vector2.zero;
-
-            var tailPosition = _tailImage.rectTransform.anchoredPosition;
-            tailPosition.x = bubbleWidth * 0.5f - _tailHorizontalInset;
-            tailPosition.y = -bubbleHeight * 0.5f - _tailVerticalOffset;
-            _tailImage.rectTransform.anchoredPosition = tailPosition;
 
             var itemRect = transform as RectTransform;
             var itemHeight = Mathf.Max(_minItemHeight, bubbleHeight + _itemVerticalPadding);
@@ -104,48 +96,15 @@ namespace UnityMiniDemos.Features.MagicWords
 
         private bool HasValidSetup()
         {
-            if (_bubble == null)
+            if (_container == null || _message == null || _content == null || _bubble == null || _user == null || _layoutGroup == null)
             {
-                Debug.LogError("DialogueItemView requires bubble reference.", this);
+                Debug.LogError("DialogueItemView requires container, message, content, bubble, user and layout group references.", this);
                 return false;
             }
 
-            _container = FindContainer();
-
-            if (_container == null)
+            if (_bubbleImage == null || _tailImage == null || _avatarImage == null || _emptyAvatar == null)
             {
-                Debug.LogError("DialogueItemView requires a container child.", this);
-                return false;
-            }
-
-            _message = FindMessage();
-
-            if (_message == null)
-            {
-                Debug.LogError("DialogueItemView requires a message child inside the container.", this);
-                return false;
-            }
-
-            if (_user == null || _user.parent != _container)
-                _user = _container.Find("User") as RectTransform;
-
-            if (_user == null)
-            {
-                Debug.LogError("DialogueItemView requires a User child.", this);
-                return false;
-            }
-
-            _layoutGroup = _container.GetComponent<HorizontalLayoutGroup>();
-
-            if (_layoutGroup == null)
-            {
-                Debug.LogError("DialogueItemView requires a horizontal layout group on the container.", this);
-                return false;
-            }
-
-            if (_bubbleImage == null || _tailImage == null || _avatarImage == null)
-            {
-                Debug.LogError("DialogueItemView requires image references.", this);
+                Debug.LogError("DialogueItemView requires bubble, tail, avatar and empty avatar references.", this);
                 return false;
             }
 
@@ -156,28 +115,6 @@ namespace UnityMiniDemos.Features.MagicWords
             }
 
             return true;
-        }
-
-        private RectTransform FindContainer()
-        {
-            var current = _bubble.parent as RectTransform;
-            while (current != null && current.parent != transform)
-            {
-                current = current.parent as RectTransform;
-            }
-
-            return current;
-        }
-
-        private RectTransform FindMessage()
-        {
-            var current = _bubble.parent as RectTransform;
-            while (current != null && current.parent != _container)
-            {
-                current = current.parent as RectTransform;
-            }
-
-            return current;
         }
     }
 }

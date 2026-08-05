@@ -25,7 +25,9 @@ namespace UnityMiniDemos.Features.MagicWords
         private readonly DialogueLoader _loader = new DialogueLoader();
         private readonly AvatarLoader _avatarLoader = new AvatarLoader();
         private readonly EmojiTextProcessor _emojiTextProcessor = new EmojiTextProcessor();
+        private readonly Dictionary<string, AvatarData> _avatarsByName = new(StringComparer.OrdinalIgnoreCase);
         private Coroutine _loadRoutine;
+        private Coroutine _avatarRoutine;
 
         private void OnEnable()
         {
@@ -41,11 +43,8 @@ namespace UnityMiniDemos.Features.MagicWords
         {
             _retryButton?.onClick.RemoveListener(LoadDialogue);
 
-            if (_loadRoutine != null)
-            {
-                StopCoroutine(_loadRoutine);
-                _loadRoutine = null;
-            }
+            StopLoadRoutines();
+            _avatarLoader.Clear();
         }
 
         private void LoadDialogue()
@@ -53,9 +52,8 @@ namespace UnityMiniDemos.Features.MagicWords
             if (!HasValidSetup())
                 return;
 
-            if (_loadRoutine != null)
-                StopCoroutine(_loadRoutine);
-
+            StopLoadRoutines();
+            _avatarLoader.Clear();
             ClearMessages();
             SetStatus(LoadingMessage);
             _loadRoutine = StartCoroutine(LoadDialogueRoutine());
@@ -75,12 +73,11 @@ namespace UnityMiniDemos.Features.MagicWords
             if (!isActiveAndEnabled || !TryHandleResponse(response, errorMessage))
                 yield break;
 
-            Dictionary<string, Texture2D> avatarTextures = null;
+            BuildAvatarLookup(response.avatars);
 
-            yield return _avatarLoader.Load(response.avatars, loadedTextures => avatarTextures = loadedTextures);
-
-            if (!isActiveAndEnabled)
-                yield break;
+            // All avatars download at once, and each message waits only for its own speaker,
+            // so one slow or broken URL never holds back the rest of the conversation.
+            _avatarRoutine = StartCoroutine(_avatarLoader.LoadAll(response.avatars));
 
             var dialogueEntries = GetDialogueEntries(response.dialogue);
 
@@ -91,19 +88,22 @@ namespace UnityMiniDemos.Features.MagicWords
                 yield break;
             }
 
-            yield return ShowDialogueRoutine(response, avatarTextures, dialogueEntries);
+            yield return ShowDialogueRoutine(dialogueEntries);
 
             _loadRoutine = null;
             SetStatus(FinishMessage);
         }
 
-        private IEnumerator ShowDialogueRoutine(DialogueResponse response, Dictionary<string, Texture2D> avatarTextures, List<DialogueEntry> dialogueEntries)
+        private IEnumerator ShowDialogueRoutine(List<DialogueEntry> dialogueEntries)
         {
-            SetStatus(null);
-
             for (var index = 0; index < dialogueEntries.Count; index++)
             {
-                CreateMessage(response, avatarTextures, dialogueEntries[index]);
+                var dialogueEntry = dialogueEntries[index];
+
+                yield return _avatarLoader.WaitForAvatar(dialogueEntry.name);
+
+                SetStatus(null);
+                CreateMessage(dialogueEntry);
 
                 yield return null;
                 yield return ScrollToLatestMessage();
@@ -145,40 +145,36 @@ namespace UnityMiniDemos.Features.MagicWords
             return true;
         }
 
-        private void CreateMessage(DialogueResponse response, Dictionary<string, Texture2D> avatarTextures, DialogueEntry dialogueEntry)
+        private void CreateMessage(DialogueEntry dialogueEntry)
         {
-            var avatarData = FindAvatar(response.avatars, dialogueEntry.name);
-            var avatarTexture = FindTexture(avatarTextures, dialogueEntry.name);
             var dialogueItem = Instantiate(_dialogueItemPrefab, _content);
             var message = _emojiTextProcessor.Process(dialogueEntry.text);
-            dialogueItem.Configure(dialogueEntry.name, message, avatarTexture, IsLeftPosition(avatarData));
+            _avatarLoader.TryGetTexture(dialogueEntry.name, out var avatarTexture);
+            dialogueItem.Configure(dialogueEntry.name, message, avatarTexture, IsLeftPosition(dialogueEntry.name));
         }
 
-        private static Texture2D FindTexture(Dictionary<string, Texture2D> textures, string characterName)
+        private void BuildAvatarLookup(AvatarData[] avatars)
         {
-            if (textures == null || string.IsNullOrWhiteSpace(characterName))
-                return null;
+            _avatarsByName.Clear();
 
-            textures.TryGetValue(characterName, out var texture);
-            return texture;
-        }
-
-        private static AvatarData FindAvatar(AvatarData[] avatars, string characterName)
-        {
-            if (avatars == null || string.IsNullOrWhiteSpace(characterName))
-                return null;
+            if (avatars == null)
+                return;
 
             foreach (var avatar in avatars)
             {
-                if (avatar == null || !string.Equals(avatar.name, characterName, StringComparison.OrdinalIgnoreCase))
+                if (avatar == null || string.IsNullOrWhiteSpace(avatar.name) || !AvatarPosition.IsKnown(avatar.position))
                     continue;
 
-                if (string.Equals(avatar.position, "left", StringComparison.OrdinalIgnoreCase) || 
-                    string.Equals(avatar.position, "right", StringComparison.OrdinalIgnoreCase))
-                    return avatar;
+                _avatarsByName.TryAdd(avatar.name, avatar);
             }
+        }
 
-            return null;
+        private bool IsLeftPosition(string characterName)
+        {
+            if (string.IsNullOrWhiteSpace(characterName) || !_avatarsByName.TryGetValue(characterName, out var avatar))
+                return false;
+
+            return AvatarPosition.IsLeft(avatar.position);
         }
 
         private void ClearMessages()
@@ -186,6 +182,21 @@ namespace UnityMiniDemos.Features.MagicWords
             for (var index = _content.childCount - 1; index >= 0; index--)
             {
                 Destroy(_content.GetChild(index).gameObject);
+            }
+        }
+
+        private void StopLoadRoutines()
+        {
+            if (_loadRoutine != null)
+            {
+                StopCoroutine(_loadRoutine);
+                _loadRoutine = null;
+            }
+
+            if (_avatarRoutine != null)
+            {
+                StopCoroutine(_avatarRoutine);
+                _avatarRoutine = null;
             }
         }
 
@@ -215,11 +226,6 @@ namespace UnityMiniDemos.Features.MagicWords
 
             if (message != null)
                 _statusText.SetText(message);
-        }
-
-        private static bool IsLeftPosition(AvatarData avatar)
-        {
-            return avatar != null && string.Equals(avatar.position, "left", StringComparison.OrdinalIgnoreCase);
         }
 
         private bool HasValidSetup()

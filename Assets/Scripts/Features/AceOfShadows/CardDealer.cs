@@ -5,7 +5,7 @@ using TMPro;
 
 namespace UnityMiniDemos.Features.AceOfShadows
 {
-    public sealed class AnimationController : MonoBehaviour
+    public sealed class CardDealer : MonoBehaviour
     {
         private const int SuitCount = 4;
         private const int CardsPerSuit = 36;
@@ -16,6 +16,8 @@ namespace UnityMiniDemos.Features.AceOfShadows
         [SerializeField] private CardView _cardPrefab;
         [SerializeField] private DeckView _leftDeck;
         [SerializeField] private DeckView _rightDeck;
+        [SerializeField] private RectTransform _leftStackRoot;
+        [SerializeField] private RectTransform _rightStackRoot;
         [SerializeField] private TMP_Text _resultText;
         [SerializeField] private Sprite[] _suitSprites;
         [SerializeField, Min(0.01f)] private float _moveDuration = 0.5f;
@@ -30,6 +32,7 @@ namespace UnityMiniDemos.Features.AceOfShadows
             new Keyframe(1f, 0f)
         );
 
+        private Transform _animationRoot;
         private Coroutine _dealRoutine;
         private float _speedMultiplier = 1f;
 
@@ -67,9 +70,10 @@ namespace UnityMiniDemos.Features.AceOfShadows
                 if (index > 0)
                     yield return WaitBetweenCards();
 
-                yield return AnimateCard(cards[index]);
-                ArrangeLeftStack(cards, index + 1);
-                ArrangeRightStack(cards, index + 1);
+                var card = cards[index];
+                LiftFromLeftStack(card);
+                yield return AnimateCard(card);
+                DropOnRightStack(card);
                 UpdateDeckCounters(index + 1);
             }
 
@@ -80,13 +84,14 @@ namespace UnityMiniDemos.Features.AceOfShadows
         private CardView[] CreateCards(IReadOnlyList<CardData> deck)
         {
             var cards = new CardView[deck.Count];
-            var parent = _leftDeck.transform.parent;
             var deckPosition = _leftDeck.RectTransform.position;
             var stackOffset = GetStackOffset();
 
+            _animationRoot = _leftStackRoot.parent;
+
             for (var index = deck.Count - 1; index >= 0; index--)
             {
-                var card = Instantiate(_cardPrefab, parent);
+                var card = Instantiate(_cardPrefab, _leftStackRoot);
                 var cardTransform = card.RectTransform;
                 cardTransform.position = deckPosition + stackOffset * index;
                 cardTransform.localRotation = Quaternion.identity;
@@ -97,11 +102,27 @@ namespace UnityMiniDemos.Features.AceOfShadows
             return cards;
         }
 
+        private void LiftFromLeftStack(CardView card)
+        {
+            var cardTransform = card.RectTransform;
+            cardTransform.SetParent(_animationRoot, true);
+            cardTransform.SetAsLastSibling();
+        }
+
+        private void DropOnRightStack(CardView card)
+        {
+            var stackOffset = GetStackOffset();
+            _rightStackRoot.position += stackOffset;
+            _leftStackRoot.position -= stackOffset;
+
+            var cardTransform = card.RectTransform;
+            cardTransform.SetParent(_rightStackRoot, true);
+            cardTransform.SetAsLastSibling();
+        }
+
         private IEnumerator AnimateCard(CardView card)
         {
             var cardTransform = card.RectTransform;
-            cardTransform.SetAsLastSibling();
-
             var startPosition = cardTransform.position;
             var endPosition = _rightDeck.RectTransform.position;
 
@@ -125,7 +146,6 @@ namespace UnityMiniDemos.Features.AceOfShadows
 
             cardTransform.position = endPosition;
             cardTransform.localScale = baseScale;
-            cardTransform.SetAsLastSibling();
         }
 
         private IEnumerator WaitBetweenCards()
@@ -143,19 +163,25 @@ namespace UnityMiniDemos.Features.AceOfShadows
         {
             if (_cardPrefab == null || _leftDeck == null || _rightDeck == null || _resultText == null)
             {
-                Debug.LogError("AnimationController requires a card prefab, two decks and a result text.", this);
+                Debug.LogError("CardDealer requires a card prefab, two decks and a result text.", this);
                 return false;
             }
 
             if (!_leftDeck.IsConfigured || !_rightDeck.IsConfigured)
             {
-                Debug.LogError("AnimationController requires a counter on both decks.", this);
+                Debug.LogError("CardDealer requires a counter on both decks.", this);
+                return false;
+            }
+
+            if (_leftStackRoot == null || _rightStackRoot == null || _leftStackRoot.parent == null)
+            {
+                Debug.LogError("CardDealer requires a left and a right stack root with a shared parent.", this);
                 return false;
             }
 
             if (_suitSprites == null || _suitSprites.Length != SuitCount)
             {
-                Debug.LogError("AnimationController requires four suit sprites in enum order: Clubs, Spades, Hearts, Diamonds.", this);
+                Debug.LogError("CardDealer requires four suit sprites in enum order: Clubs, Spades, Hearts, Diamonds.", this);
                 return false;
             }
 
@@ -163,7 +189,7 @@ namespace UnityMiniDemos.Features.AceOfShadows
             {
                 if (_suitSprites[index] == null)
                 {
-                    Debug.LogError($"AnimationController is missing suit sprite at index {index}.", this);
+                    Debug.LogError($"CardDealer is missing suit sprite at index {index}.", this);
                     return false;
                 }
             }
@@ -188,30 +214,6 @@ namespace UnityMiniDemos.Features.AceOfShadows
         {
             _resultText.SetText(CompletionMessage);
             _resultText.gameObject.SetActive(true);
-        }
-
-        private void ArrangeLeftStack(IReadOnlyList<CardView> cards, int firstRemainingIndex)
-        {
-            var deckPosition = _leftDeck.RectTransform.position;
-            var stackOffset = GetStackOffset();
-
-            for (var index = firstRemainingIndex; index < cards.Count; index++)
-            {
-                var stackPosition = index - firstRemainingIndex;
-                cards[index].RectTransform.position = deckPosition + stackOffset * stackPosition;
-            }
-        }
-
-        private void ArrangeRightStack(IReadOnlyList<CardView> cards, int movedCardCount)
-        {
-            var deckPosition = _rightDeck.RectTransform.position;
-            var stackOffset = GetStackOffset();
-
-            for (var index = 0; index < movedCardCount; index++)
-            {
-                var stackPosition = movedCardCount - 1 - index;
-                cards[index].RectTransform.position = deckPosition + stackOffset * stackPosition;
-            }
         }
 
         private static List<CardData> CreateDeck()

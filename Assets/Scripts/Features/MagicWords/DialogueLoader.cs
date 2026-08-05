@@ -9,10 +9,12 @@ namespace UnityMiniDemos.Features.MagicWords
     {
         private const string EndpointUrl = "https://private-624120-softgamesassignment.apiary-mock.com/v3/magicwords";
         private const string LoadErrorMessage = "Unable to load messages.";
+        private const int RequestTimeoutSeconds = 10;
 
         public IEnumerator Load(Action<DialogueResponse, string> onCompleted)
         {
             using var request = UnityWebRequest.Get(EndpointUrl);
+            request.timeout = RequestTimeoutSeconds;
             yield return request.SendWebRequest();
 
             if (request.result != UnityWebRequest.Result.Success)
@@ -31,13 +33,6 @@ namespace UnityMiniDemos.Features.MagicWords
             catch (Exception exception)
             {
                 Debug.LogError($"Magic Words response parsing failed: {exception.Message}");
-                onCompleted?.Invoke(null, LoadErrorMessage);
-                yield break;
-            }
-
-            if (response == null)
-            {
-                Debug.LogError("Magic Words response is empty.");
                 onCompleted?.Invoke(null, LoadErrorMessage);
                 yield break;
             }
