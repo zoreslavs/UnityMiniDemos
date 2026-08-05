@@ -1,0 +1,6 @@
+Twemoji graphics
+
+The emoji graphics in this folder are from Twemoji by Twitter, Inc. and other contributors.
+Source: https://github.com/twitter/twemoji
+Graphics license: CC-BY 4.0
+License: https://creativecommons.org/licenses/by/4.0/
