@@ -75,8 +75,6 @@ namespace UnityMiniDemos.Features.MagicWords
 
             BuildAvatarLookup(response.avatars);
 
-            // All avatars download at once, and each message waits only for its own speaker,
-            // so one slow or broken URL never holds back the rest of the conversation.
             _avatarRoutine = StartCoroutine(_avatarLoader.LoadAll(response.avatars));
 
             var dialogueEntries = GetDialogueEntries(response.dialogue);
