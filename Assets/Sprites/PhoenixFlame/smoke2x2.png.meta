@@ -1,10 +1,19 @@
 fileFormatVersion: 2
-guid: cbbd05a486aa84d318ca3d1cf08ea16a
+guid: e11102a3d05af49989217c4b8b43455b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7587821892804703883
-    second: text_bubble_tail_0
+      213: -7497325012890499570
+    second: smoke2x2_0
+  - first:
+      213: 6270206895217658772
+    second: smoke2x2_1
+  - first:
+      213: -3543267424385190253
+    second: smoke2x2_2
+  - first:
+      213: 8400684820229374527
+    second: smoke2x2_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -139,13 +148,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: text_bubble_tail_0
+      name: smoke2x2_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 413
-        height: 256
+        x: 30
+        y: 308
+        width: 196
+        height: 158
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +163,74 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b867e8b3fcb5d4960800000000000000
-      internalID: 7587821892804703883
+      spriteID: e06c2019f9624f790800000000000000
+      internalID: -7497325012890499570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: smoke2x2_1
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 314
+        width: 146
+        height: 126
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 49b47a143ff340750800000000000000
+      internalID: 6270206895217658772
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: smoke2x2_2
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 37
+        width: 187
+        height: 161
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 396be41fc09c3dec0800000000000000
+      internalID: -3543267424385190253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: smoke2x2_3
+      rect:
+        serializedVersion: 2
+        x: 293
+        y: 9
+        width: 186
+        height: 189
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f32c9c3d55a359470800000000000000
+      internalID: 8400684820229374527
       vertices: []
       indices: 
       edges: []
@@ -174,7 +249,10 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      text_bubble_tail_0: 7587821892804703883
+      smoke2x2_0: -7497325012890499570
+      smoke2x2_1: 6270206895217658772
+      smoke2x2_2: -3543267424385190253
+      smoke2x2_3: 8400684820229374527
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
