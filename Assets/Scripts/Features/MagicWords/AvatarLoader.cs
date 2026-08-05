@@ -12,6 +12,7 @@ namespace UnityMiniDemos.Features.MagicWords
 
         private readonly Dictionary<string, Texture2D> _textures = new(StringComparer.OrdinalIgnoreCase);
         private readonly HashSet<string> _pendingNames = new(StringComparer.OrdinalIgnoreCase);
+        private readonly List<(string Name, UnityWebRequest Request)> _activeRequests = new();
 
         public bool TryGetTexture(string characterName, out Texture2D texture)
         {
@@ -29,8 +30,6 @@ namespace UnityMiniDemos.Features.MagicWords
             if (avatars == null)
                 yield break;
 
-            var pending = new List<(string Name, UnityWebRequest Request)>();
-
             foreach (var avatar in avatars)
             {
                 if (!IsValidAvatar(avatar) || !_pendingNames.Add(avatar.name))
@@ -39,19 +38,26 @@ namespace UnityMiniDemos.Features.MagicWords
                 var request = UnityWebRequestTexture.GetTexture(avatar.url);
                 request.timeout = RequestTimeoutSeconds;
                 request.SendWebRequest();
-                pending.Add((avatar.name, request));
+                _activeRequests.Add((avatar.name, request));
             }
 
-            foreach (var (name, request) in pending)
+            while (_activeRequests.Count > 0)
             {
-                while (!request.isDone)
+                for (var index = _activeRequests.Count - 1; index >= 0; index--)
                 {
-                    yield return null;
+                    var (name, request) = _activeRequests[index];
+
+                    if (!request.isDone)
+                        continue;
+
+                    TakeTexture(name, request);
+                    request.Dispose();
+                    _pendingNames.Remove(name);
+                    _activeRequests.RemoveAt(index);
                 }
 
-                TakeTexture(name, request);
-                request.Dispose();
-                _pendingNames.Remove(name);
+                if (_activeRequests.Count > 0)
+                    yield return null;
             }
         }
 
@@ -68,6 +74,15 @@ namespace UnityMiniDemos.Features.MagicWords
 
         public void Clear()
         {
+            foreach (var (_, request) in _activeRequests)
+            {
+                if (!request.isDone)
+                    request.Abort();
+
+                request.Dispose();
+            }
+
+            _activeRequests.Clear();
             _pendingNames.Clear();
 
             foreach (var texture in _textures.Values)
