@@ -1,15 +1,15 @@
 fileFormatVersion: 2
-guid: 71d37400ca39a415ba9197e15f6265a0
+guid: 350dbcb0d00bb466c9945b6c87baefc6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5596289105902040007
-    second: campfire_stones_0
+      213: 1972233089127698970
+    second: ace_of_shadows_title_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -139,23 +139,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: campfire_stones_0
+      name: ace_of_shadows_title_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 692
-        height: 223
+        x: 71
+        y: 7
+        width: 860
+        height: 454
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7c3fda99a430aad40800000000000000
-      internalID: 5596289105902040007
+      spriteID: a125ab39b87ce5b10800000000000000
+      internalID: 1972233089127698970
       vertices: []
       indices: 
       edges: []
@@ -164,7 +164,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 602ca954f1c4b4a12818b98ed9447cf2
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      campfire_stones_0: 5596289105902040007
+      ace_of_shadows_title_0: 1972233089127698970
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -58,7 +58,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
-  m_Color: {r: 0.93333333, g: 0.95294118, b: 0.97254902, a: 1}
+  m_Color: {r: 0.93333334, g: 0.9529412, b: 0.972549, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -75,7 +75,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 0.93333333, g: 0.95294118, b: 0.97254902, a: 1}
+  m_fontColor: {r: 0.93333334, g: 0.9529412, b: 0.972549, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -471,7 +471,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
   m_Material: {fileID: 0}
-  m_Color: {r: 0.93333333, g: 0.95294118, b: 0.97254902, a: 1}
+  m_Color: {r: 0.93333334, g: 0.9529412, b: 0.972549, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -487,8 +487,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
-  m_fontColor: {r: 0.93333333, g: 0.95294118, b: 0.97254902, a: 1}
+    rgba: 4294505454
+  m_fontColor: {r: 0.93333334, g: 0.9529412, b: 0.972549, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -647,8 +647,8 @@ MonoBehaviour:
   _emptyAvatar: {fileID: 6516246069974508271}
   _nameText: {fileID: 7377401135327166286}
   _messageText: {fileID: 8602205015609207188}
-  _leftBubbleColor: {r: 0.22745098, g: 0.32156864, b: 0.44705883, a: 1}
-  _rightBubbleColor: {r: 0.28235295, g: 0.40392157, b: 0.5372549, a: 1}
+  _leftBubbleColor: {r: 0.16078431, g: 0.29411765, b: 0.44705883, a: 1}
+  _rightBubbleColor: {r: 0.31764706, g: 0.29411765, b: 0.54901961, a: 1}
   _horizontalPadding: 24
   _minBubbleWidth: 280
   _maxBubbleWidth: 500
