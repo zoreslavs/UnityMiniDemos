@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
+    <title>{{{ PRODUCT_NAME }}}</title>
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body>
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+
+    <main id="loading-screen" aria-live="polite">
+      <div class="loading-content">
+        <p id="loading-label">Loading…</p>
+        <div id="loading-progress" role="progressbar" aria-label="Loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-track">
+            <div id="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="Build/{{{ LOADER_FILENAME }}}"></script>
+    <script>
+      const canvas = document.querySelector("#unity-canvas");
+      const loadingScreen = document.querySelector("#loading-screen");
+      const loadingLabel = document.querySelector("#loading-label");
+      const loadingProgress = document.querySelector("#loading-progress");
+      const progressFill = document.querySelector("#progress-fill");
+
+      const config = {
+        arguments: [],
+        dataUrl: "Build/{{{ DATA_FILENAME }}}",
+        frameworkUrl: "Build/{{{ FRAMEWORK_FILENAME }}}",
+        codeUrl: "Build/{{{ CODE_FILENAME }}}",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "{{{ COMPANY_NAME }}}",
+        productName: "{{{ PRODUCT_NAME }}}",
+        productVersion: "{{{ PRODUCT_VERSION }}}"
+      };
+
+      createUnityInstance(canvas, config, (progress) => {
+        const percent = Math.round(progress * 100);
+        progressFill.style.width = `${percent}%`;
+        loadingProgress.setAttribute("aria-valuenow", percent);
+        loadingLabel.textContent = `Loading… ${percent}%`;
+      }).then(() => {
+        loadingScreen.classList.add("is-hidden");
+        window.setTimeout(() => loadingScreen.remove(), 300);
+      }).catch((error) => {
+        console.error(error);
+        loadingLabel.textContent = "Unable to load the game.";
+        loadingProgress.classList.add("is-hidden");
+      });
+    </script>
+  </body>
+</html>
