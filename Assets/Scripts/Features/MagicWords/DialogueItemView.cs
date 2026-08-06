@@ -18,8 +18,6 @@ namespace UnityMiniDemos.Features.MagicWords
         [SerializeField] private GameObject _emptyAvatar;
         [SerializeField] private TMP_Text _nameText;
         [SerializeField] private TMP_Text _messageText;
-        [SerializeField] private Color _leftBubbleColor = new Color32(58, 82, 114, 255);
-        [SerializeField] private Color _rightBubbleColor = new Color32(72, 103, 137, 255);
         [SerializeField] private int _horizontalPadding = 24;
         [SerializeField] private float _minBubbleWidth = 280f;
         [SerializeField] private float _maxBubbleWidth = 500f;
@@ -29,7 +27,7 @@ namespace UnityMiniDemos.Features.MagicWords
         [SerializeField] private float _minItemHeight = 300f;
         [SerializeField] private float _itemVerticalPadding = 40f;
 
-        public void Configure(string name, string message, Texture2D avatar, bool alignLeft)
+        public void Configure(string name, string message, Texture2D avatar, bool alignLeft, Color bubbleColor)
         {
             if (!HasValidSetup())
                 return;
@@ -39,11 +37,11 @@ namespace UnityMiniDemos.Features.MagicWords
             _avatarImage.texture = avatar;
             _avatarImage.enabled = avatar != null;
             _emptyAvatar.SetActive(avatar == null);
-            SetAlignment(alignLeft);
+            SetAlignment(alignLeft, bubbleColor);
             ResizeMessage();
         }
 
-        private void SetAlignment(bool alignLeft)
+        private void SetAlignment(bool alignLeft, Color bubbleColor)
         {
             if (alignLeft)
             {
@@ -60,7 +58,6 @@ namespace UnityMiniDemos.Features.MagicWords
             _layoutGroup.padding.left = alignLeft ? _horizontalPadding : 0;
             _layoutGroup.padding.right = alignLeft ? 0 : _horizontalPadding;
 
-            var bubbleColor = alignLeft ? _leftBubbleColor : _rightBubbleColor;
             _bubbleImage.color = bubbleColor;
             _tailImage.color = bubbleColor;
             _bubble.localScale = alignLeft ? new Vector3(-1f, 1f, 1f) : Vector3.one;

@@ -12,7 +12,6 @@ namespace UnityMiniDemos.Features.MagicWords
         private const string LoadingMessage = "Loading dialogue...";
         private const string NoInternetMessage = "No internet connection.";
         private const string EmptyMessage = "No dialogue available.";
-        private const string FinishMessage = "The dialogue is finished.";
 
         [SerializeField] private ScrollRect _scrollRect;
         [SerializeField] private RectTransform _content;
@@ -27,6 +26,7 @@ namespace UnityMiniDemos.Features.MagicWords
         private readonly AvatarLoader _avatarLoader = new AvatarLoader();
         private readonly EmojiTextProcessor _emojiTextProcessor = new EmojiTextProcessor();
         private readonly Dictionary<string, AvatarData> _avatarsByName = new(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Color> _bubbleColorsByName = new(StringComparer.OrdinalIgnoreCase);
         private Coroutine _loadRoutine;
         private Coroutine _avatarRoutine;
 
@@ -56,6 +56,7 @@ namespace UnityMiniDemos.Features.MagicWords
             StopLoadRoutines();
             _avatarLoader.Clear();
             ClearMessages();
+            ResetBubbleColors();
 
             if (Application.internetReachability == NetworkReachability.NotReachable)
             {
@@ -97,7 +98,6 @@ namespace UnityMiniDemos.Features.MagicWords
             yield return ShowDialogueRoutine(dialogueEntries);
 
             _loadRoutine = null;
-            SetStatus(FinishMessage);
         }
 
         private IEnumerator ShowDialogueRoutine(List<DialogueEntry> dialogueEntries)
@@ -156,7 +156,12 @@ namespace UnityMiniDemos.Features.MagicWords
             var dialogueItem = Instantiate(_dialogueItemPrefab, _content);
             var message = _emojiTextProcessor.Process(dialogueEntry.text);
             _avatarLoader.TryGetTexture(dialogueEntry.name, out var avatarTexture);
-            dialogueItem.Configure(dialogueEntry.name, message, avatarTexture, IsLeftPosition(dialogueEntry.name));
+            dialogueItem.Configure(
+                dialogueEntry.name,
+                message,
+                avatarTexture,
+                IsLeftPosition(dialogueEntry.name),
+                GetBubbleColor(dialogueEntry.name));
         }
 
         private void BuildAvatarLookup(AvatarData[] avatars)
@@ -181,6 +186,41 @@ namespace UnityMiniDemos.Features.MagicWords
                 return false;
 
             return AvatarPosition.IsLeft(avatar.position);
+        }
+
+        private Color GetBubbleColor(string characterName)
+        {
+            var colorKey = string.IsNullOrWhiteSpace(characterName) ? "Unknown" : characterName;
+
+            if (_bubbleColorsByName.TryGetValue(colorKey, out var bubbleColor))
+                return bubbleColor;
+
+            bubbleColor = GenerateBubbleColor(colorKey);
+            _bubbleColorsByName.Add(colorKey, bubbleColor);
+            return bubbleColor;
+        }
+
+        private static Color GenerateBubbleColor(string characterName)
+        {
+            const uint offsetBasis = 2166136261;
+            const uint prime = 16777619;
+            var hash = offsetBasis;
+
+            for (var index = 0; index < characterName.Length; index++)
+            {
+                hash ^= char.ToUpperInvariant(characterName[index]);
+                hash *= prime;
+            }
+
+            var hue = Mathf.Lerp(0.57f, 0.82f, (hash & 0xFF) / 255f);
+            var saturation = Mathf.Lerp(0.4f, 0.55f, (hash >> 8 & 0xFF) / 255f);
+            var value = Mathf.Lerp(0.44f, 0.58f, (hash >> 16 & 0xFF) / 255f);
+            return Color.HSVToRGB(hue, saturation, value);
+        }
+
+        private void ResetBubbleColors()
+        {
+            _bubbleColorsByName.Clear();
         }
 
         private void ClearMessages()

@@ -647,8 +647,6 @@ MonoBehaviour:
   _emptyAvatar: {fileID: 6516246069974508271}
   _nameText: {fileID: 7377401135327166286}
   _messageText: {fileID: 8602205015609207188}
-  _leftBubbleColor: {r: 0.16078431, g: 0.29411765, b: 0.44705883, a: 1}
-  _rightBubbleColor: {r: 0.31764706, g: 0.29411765, b: 0.54901961, a: 1}
   _horizontalPadding: 24
   _minBubbleWidth: 280
   _maxBubbleWidth: 500
