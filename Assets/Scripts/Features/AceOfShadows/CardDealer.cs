@@ -7,9 +7,6 @@ namespace UnityMiniDemos.Features.AceOfShadows
 {
     public sealed class CardDealer : MonoBehaviour
     {
-        private const int SuitCount = 4;
-        private const int CardsPerSuit = 36;
-        private const int DeckSize = CardsPerSuit * SuitCount;
         private const float AnimPeakTime = 0.5f;
         private const string CompletionMessage = "All cards moved!";
 
@@ -60,8 +57,8 @@ namespace UnityMiniDemos.Features.AceOfShadows
             if (!HasValidSetup())
                 yield break;
 
-            var deck = CreateDeck();
-            ShuffleDeck(deck);
+            var deck = CardDeck.Create();
+            CardDeck.Shuffle(deck);
             var cards = CreateCards(deck);
             InitializeView();
 
@@ -159,6 +156,35 @@ namespace UnityMiniDemos.Features.AceOfShadows
             }
         }
 
+        private void InitializeView()
+        {
+            _leftDeck.SetCount(CardDeck.Count);
+            _rightDeck.SetCount(0);
+            _resultText.gameObject.SetActive(false);
+        }
+
+        private void UpdateDeckCounters(int movedCardCount)
+        {
+            _leftDeck.SetCount(CardDeck.Count - movedCardCount);
+            _rightDeck.SetCount(movedCardCount);
+        }
+
+        private void ShowCompletionMessage()
+        {
+            _resultText.SetText(CompletionMessage);
+            _resultText.gameObject.SetActive(true);
+        }
+
+        private float GetRemainingWaitDuration()
+        {
+            return Mathf.Max(0f, _cardInterval - _moveDuration) / _speedMultiplier;
+        }
+
+        private Vector3 GetStackOffset()
+        {
+            return new Vector3(_stackOffset.x, _stackOffset.y, 0f);
+        }
+
         private bool HasValidSetup()
         {
             if (_cardPrefab == null || _leftDeck == null || _rightDeck == null || _resultText == null)
@@ -179,7 +205,7 @@ namespace UnityMiniDemos.Features.AceOfShadows
                 return false;
             }
 
-            if (_suitSprites == null || _suitSprites.Length != SuitCount)
+            if (_suitSprites == null || _suitSprites.Length != CardDeck.SuitCount)
             {
                 Debug.LogError("CardDealer requires four suit sprites in enum order: Clubs, Spades, Hearts, Diamonds.", this);
                 return false;
@@ -195,59 +221,6 @@ namespace UnityMiniDemos.Features.AceOfShadows
             }
 
             return _moveDuration > 0f && _cardInterval > 0f && _animCurve != null;
-        }
-
-        private void InitializeView()
-        {
-            _leftDeck.SetCount(DeckSize);
-            _rightDeck.SetCount(0);
-            _resultText.gameObject.SetActive(false);
-        }
-
-        private void UpdateDeckCounters(int movedCardCount)
-        {
-            _leftDeck.SetCount(DeckSize - movedCardCount);
-            _rightDeck.SetCount(movedCardCount);
-        }
-
-        private void ShowCompletionMessage()
-        {
-            _resultText.SetText(CompletionMessage);
-            _resultText.gameObject.SetActive(true);
-        }
-
-        private static List<CardData> CreateDeck()
-        {
-            var deck = new List<CardData>(DeckSize);
-
-            for (var suitIndex = 0; suitIndex < SuitCount; suitIndex++)
-            {
-                for (var number = 1; number <= CardsPerSuit; number++)
-                {
-                    deck.Add(new CardData(number, (CardSuit)suitIndex));
-                }
-            }
-
-            return deck;
-        }
-
-        private static void ShuffleDeck(IList<CardData> deck)
-        {
-            for (var index = deck.Count - 1; index > 0; index--)
-            {
-                var swapIndex = Random.Range(0, index + 1);
-                (deck[index], deck[swapIndex]) = (deck[swapIndex], deck[index]);
-            }
-        }
-
-        private float GetRemainingWaitDuration()
-        {
-            return Mathf.Max(0f, _cardInterval - _moveDuration) / _speedMultiplier;
-        }
-
-        private Vector3 GetStackOffset()
-        {
-            return new Vector3(_stackOffset.x, _stackOffset.y, 0f);
         }
     }
 }
