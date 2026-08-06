@@ -10,6 +10,7 @@ namespace UnityMiniDemos.Features.MagicWords
     public sealed class DialogueController : MonoBehaviour
     {
         private const string LoadingMessage = "Loading dialogue...";
+        private const string NoInternetMessage = "No internet connection.";
         private const string EmptyMessage = "No dialogue available.";
         private const string FinishMessage = "The dialogue is finished.";
 
@@ -55,6 +56,13 @@ namespace UnityMiniDemos.Features.MagicWords
             StopLoadRoutines();
             _avatarLoader.Clear();
             ClearMessages();
+
+            if (Application.internetReachability == NetworkReachability.NotReachable)
+            {
+                SetStatus(NoInternetMessage, true);
+                return;
+            }
+
             SetStatus(LoadingMessage);
             _loadRoutine = StartCoroutine(LoadDialogueRoutine());
         }
